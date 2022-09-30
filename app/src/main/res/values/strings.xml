@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">aa</string>
+    <string name="app_name">Calculadora GasLp</string>
+    <string name="subir">Subirá: </string>
+    <string name="litros">Litros: </string>
+    <string name="calculadora_de_gas_lp">Calculadora de Gas Lp</string>
+    <string name="total">Total: </string>
+    <string name="total2">Sugerido: </string>
+    <string name="precio_actual">Precio Actual: </string>
+    <string name="capacidad">Capacidad: </string>
 </resources>

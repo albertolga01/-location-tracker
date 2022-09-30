@@ -150,7 +150,7 @@ public class MyForegroundService extends Service {
            // latitud.setText(sLatitud);
             //longitud.setText(sLongitud);
             setLocation(loc);
-           ObtenerUbicacionPipa("1", sLatitud, sLongitud);
+           ObtenerUbicacionPipa("8", sLatitud, sLongitud);
             System.out.println("SLatitud-"+sLatitud);
             System.out.println("SLongitud-"+sLongitud);
 

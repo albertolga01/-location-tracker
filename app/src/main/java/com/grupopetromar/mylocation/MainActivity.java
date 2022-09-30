@@ -19,6 +19,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,13 +36,27 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+
+    SeekBar SbMarcadorinicial, SbMarcadorFinal;
+    TextView TxtMInicio, TxtMFinal, TxtPrecioActual, TxtPorcentaje, TxtLitros, TxtDinero, TxtDineroSugerido;
+    Spinner spinnerCapacidad;
+    Button btnCalcular;
+    EditText eTXTPrecio;
+    int inicialM = 0, finalM = 0;
+
 
     TextView latitud,longitud;
     TextView direccion;
@@ -66,7 +87,212 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+
+        TxtMInicio = (TextView) findViewById(R.id.TxtMInicio);
+        TxtMFinal = (TextView) findViewById(R.id.TxtMFinal);
+        TxtPrecioActual = (TextView) findViewById(R.id.TxtPrecioActual);
+
+        TxtPorcentaje = (TextView) findViewById(R.id.TxtPorcentaje);
+        TxtLitros = (TextView) findViewById(R.id.TxtLitros);
+        TxtDinero = (TextView) findViewById(R.id.TxtDinero);
+        TxtDineroSugerido = (TextView) findViewById(R.id.TxtDineroSugerido);
+
+        eTXTPrecio = (EditText) findViewById(R.id.eTXTPrecio);
+
+        btnCalcular = (Button) findViewById(R.id.btnCalcular);
+
+        spinnerCapacidad = (Spinner) findViewById(R.id.spinnerCapacidad);
+        SbMarcadorinicial = (SeekBar) findViewById(R.id.SbMarcadorinicial);
+
+        SbMarcadorFinal = (SeekBar) findViewById(R.id.SbMarcadorFinal);
+
+        ObtenerPrecio();
+        ObtenerCapacidades();
+
+        btnCalcular.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // regresar al menu
+
+                TxtPorcentaje.setText(String.valueOf(finalM - inicialM));
+                int capacidad = Integer.parseInt(spinnerCapacidad.getSelectedItem().toString());
+                double porcentaje = (finalM  - inicialM);
+                porcentaje = porcentaje / 100;
+                System.out.println(String.valueOf(capacidad)  + "  " + String.valueOf(porcentaje) );
+                double litros = capacidad * porcentaje;
+                DecimalFormat df = new DecimalFormat("#.###");
+                litros = Double.parseDouble(df.format(litros));
+                TxtLitros.setText(String.valueOf(litros)+ " Litros");
+                double total = litros * Double.parseDouble(eTXTPrecio.getText().toString());
+                total = Double.parseDouble(df.format(total));
+                TxtDinero.setText("$ " +String.valueOf(total)+ " Pesos");
+
+
+
+                double totalSugerido = 0;
+                double litrosSugerido = 0;
+                double residuo = 0;
+                residuo = total % 100;
+                if(residuo > 40){
+                    residuo = 100 - residuo;
+                }else{
+                    residuo = 50 - residuo;
+                }
+
+
+                totalSugerido = total + residuo;
+                litrosSugerido = totalSugerido / Double.parseDouble(String.valueOf(eTXTPrecio.getText()));
+                TxtDineroSugerido.setText( "$ " +String.valueOf(totalSugerido) + " (" + String.valueOf(df.format(litrosSugerido)) + " L" + ")");
+
+            }
+        });
+        SbMarcadorinicial.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        {
+
+            public void onStopTrackingTouch(SeekBar SbMarcadorinicial)
+            {
+                int value = SbMarcadorinicial.getProgress(); // the value of the seekBar progress
+            }
+
+            public void onStartTrackingTouch(SeekBar SbMarcadorinicial)
+            {
+
+            }
+
+            public void onProgressChanged(SeekBar SbMarcadorinicial,
+                                          int paramInt, boolean paramBoolean)
+            {
+                inicialM = paramInt;
+                TxtMInicio.setText("" + paramInt + "%"); // here in textView the percent will be shown
+            }
+        });
+
+        SbMarcadorFinal.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        {
+
+            public void onStopTrackingTouch(SeekBar SbMarcadorFinal)
+            {
+                int value = SbMarcadorFinal.getProgress(); // the value of the seekBar progress
+            }
+
+            public void onStartTrackingTouch(SeekBar SbMarcadorinicial)
+            {
+
+            }
+
+            public void onProgressChanged(SeekBar SbMarcadorFinal,
+                                          int paramInt, boolean paramBoolean)
+            {
+
+                finalM = paramInt;
+                TxtMFinal.setText("" + paramInt + "%"); // here in textView the percent will be shown
+            }
+        });
+        spinnerCapacidad.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // your code here
+
+                //  ObtenerCapacidades(spinnerCapacidad.getSelectedItem().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+
+
+            }
+
+        });
+
+
     }
+
+
+    private void ObtenerCapacidades() {
+        //send request, display a message that nip is incorrect or let it continue to the next step
+        RequestQueue MyRequestQueue = Volley.newRequestQueue(this);
+        String urlCapacidad = "https://monitoreogas.grupopetromar.com/apirest/index.php"; // <----enter your post url here// <----enter your post url here
+        StringRequest MyStringRequest = new StringRequest(Request.Method.POST, urlCapacidad, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    System.out.print("_____ObtenerDatos______"+response);
+                    JSONObject obj = new JSONObject(response);
+                    List<String> tanques = new ArrayList<String>();
+                    JSONArray cast = obj.getJSONArray("tanques");
+                    for (int i = 0; i < cast.length(); i++) {
+                        JSONObject cap = cast.getJSONObject(i);
+                        tanques.add(cap.getString("capcidad"));
+                        System.out.println(tanques+" ---tanques");
+                    }
+                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, tanques);
+                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerCapacidad = (Spinner) findViewById(R.id.spinnerCapacidad);
+                    spinnerCapacidad.setAdapter(dataAdapter);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(MainActivity.this, "No se encontraron las capacidades", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //This code is executed if there is an error.
+            }
+        }) {
+            protected Map<String, String> getParams() {
+
+                Map<String, String> MyData = new HashMap<String, String>();
+                MyData.put("id", "getTanques");
+
+                return MyData;
+            }
+        };
+
+        MyRequestQueue.add(MyStringRequest);
+
+    }
+
+    private void ObtenerPrecio() {
+        //send request, display a message that nip is incorrect or let it continue to the next step
+        RequestQueue MyRequestQueue = Volley.newRequestQueue(this);
+        String url = "https://grupopetromar.com/db/scripts/get_productos.php"; // <----enter your post url here
+        StringRequest MyStringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject obj = new JSONObject(response);
+
+                    String productos = obj.getString("productos");
+                    JSONObject obj1 = new JSONObject(productos);
+                    String gas = obj1.getString("GAS");
+                    JSONObject gasobj = new JSONObject(gas);
+                    String preciogas = gasobj.getString("precio");
+                    TxtPrecioActual.setText(preciogas);
+                    eTXTPrecio.setText(preciogas);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        }) {
+            protected Map<String, String> getParams() {
+                Map<String, String> MyData = new HashMap<String, String>();
+                //MyData.put("id", "");
+                return MyData;
+            }
+        };
+        MyRequestQueue.add(MyStringRequest);
+    }
+
+
+
 
     public boolean foregroundServiceRunning(){
         ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
