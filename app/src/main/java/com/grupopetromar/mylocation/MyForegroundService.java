@@ -5,7 +5,9 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -39,6 +41,7 @@ public class MyForegroundService extends Service {
     private static final long MIN_TIME_BW_UPDATES = 1000*60*5;
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 15;
     private boolean canGetLocation;
+    private SharedPreferences Pipa;
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
       //  setLocation();
@@ -149,8 +152,12 @@ public class MyForegroundService extends Service {
             String sLongitud = String.valueOf(loc.getLongitude());
            // latitud.setText(sLatitud);
             //longitud.setText(sLongitud);
+
+            ///
+            Pipa = getSharedPreferences("appInfo", Context.MODE_PRIVATE);
+
             setLocation(loc);
-           ObtenerUbicacionPipa("8", sLatitud, sLongitud);
+           ObtenerUbicacionPipa(Pipa.getString("nopipa", "00000"), sLatitud, sLongitud);
             System.out.println("SLatitud-"+sLatitud);
             System.out.println("SLongitud-"+sLongitud);
 

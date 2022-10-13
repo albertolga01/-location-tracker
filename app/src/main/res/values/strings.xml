@@ -7,4 +7,5 @@
     <string name="total2">Sugerido: </string>
     <string name="precio_actual">Precio Actual: </string>
     <string name="capacidad">Capacidad: </string>
+    <string name="pipa">Pipa: </string>
 </resources>

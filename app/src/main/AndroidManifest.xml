@@ -44,7 +44,11 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+        <activity
+            android:name=".IngresaPipa"
+            android:exported="true">
 
+        </activity>
     </application>
 
 </manifest>

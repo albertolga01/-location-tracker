@@ -1,5 +1,6 @@
 package com.grupopetromar.mylocation;
 
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -8,6 +9,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -52,21 +54,26 @@ public class MainActivity extends AppCompatActivity {
 
     SeekBar SbMarcadorinicial, SbMarcadorFinal;
     TextView TxtMInicio, TxtMFinal, TxtPrecioActual, TxtPorcentaje, TxtLitros, TxtDinero, TxtDineroSugerido;
-    Spinner spinnerCapacidad;
+    Spinner spinnerCapacidad, spinnerPipa;
     Button btnCalcular;
     EditText eTXTPrecio;
     int inicialM = 0, finalM = 0;
-
+    String noPipa;
+    private SharedPreferences Pipa;
 
     TextView latitud,longitud;
     TextView direccion;
 
     public static final String url = "https://monitoreogas.grupopetromar.com/apirest/index.php" ;
 
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         latitud = (TextView) findViewById(R.id.txtLatitud);
         longitud = (TextView) findViewById(R.id.txtLongitud);
@@ -79,6 +86,15 @@ public class MainActivity extends AppCompatActivity {
             locationStart();
         }
 
+        Pipa = this.getSharedPreferences("appInfo", Context.MODE_PRIVATE);
+        String pipaSelecciona = Pipa.getString("nopipa", "00000");
+        if(pipaSelecciona.equals("00000")){
+            Intent i = new Intent(MainActivity.this, IngresaPipa.class);
+            startActivity(i);
+        }else{
+           // Toast.makeText(MainActivity.this, pipaSelecciona, Toast.LENGTH_SHORT).show();
+
+        }
 
         if(!foregroundServiceRunning()){
             Intent serviceIntent = new Intent(this, MyForegroundService.class);
@@ -120,11 +136,11 @@ public class MainActivity extends AppCompatActivity {
                 porcentaje = porcentaje / 100;
                 System.out.println(String.valueOf(capacidad)  + "  " + String.valueOf(porcentaje) );
                 double litros = capacidad * porcentaje;
-                DecimalFormat df = new DecimalFormat("#.###");
-                litros = Double.parseDouble(df.format(litros));
+              //  DecimalFormat df = new DecimalFormat("#.###");
+                litros = Double.parseDouble(String.valueOf(litros));
                 TxtLitros.setText(String.valueOf(litros)+ " Litros");
                 double total = litros * Double.parseDouble(eTXTPrecio.getText().toString());
-                total = Double.parseDouble(df.format(total));
+                total = Double.parseDouble(String.valueOf(total));
                 TxtDinero.setText("$ " +String.valueOf(total)+ " Pesos");
 
 
@@ -142,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
                 totalSugerido = total + residuo;
                 litrosSugerido = totalSugerido / Double.parseDouble(String.valueOf(eTXTPrecio.getText()));
-                TxtDineroSugerido.setText( "$ " +String.valueOf(totalSugerido) + " (" + String.valueOf(df.format(litrosSugerido)) + " L" + ")");
+                TxtDineroSugerido.setText( "$ " +String.valueOf(totalSugerido) + " (" + String.valueOf(litrosSugerido) + " L" + ")");
 
             }
         });
@@ -204,6 +220,26 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
+/*
+        spinnerpipa.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // your code here
+
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+
+
+            }
+
+        });
+*/
+
+
 
 
     }
@@ -232,9 +268,10 @@ public class MainActivity extends AppCompatActivity {
                     spinnerCapacidad = (Spinner) findViewById(R.id.spinnerCapacidad);
                     spinnerCapacidad.setAdapter(dataAdapter);
 
+
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Toast.makeText(MainActivity.this, "No se encontraron las capacidades", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "No se encontraron las capacidades ni las unidades", Toast.LENGTH_SHORT).show();
                 }
             }
         }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
