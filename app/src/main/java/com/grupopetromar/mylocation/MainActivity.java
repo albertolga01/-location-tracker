@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             locationStart();
         }
-
+        System.out.println("Pipa Seleccionada: --------> "+Pipa);
         Pipa = this.getSharedPreferences("appInfo", Context.MODE_PRIVATE);
         String pipaSelecciona = Pipa.getString("nopipa", "00000");
         if(pipaSelecciona.equals("00000")){
