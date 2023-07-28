@@ -34,7 +34,7 @@ public class IngresaPipa extends AppCompatActivity {
         spinnerPipa = (Spinner) findViewById(R.id.spinnerPipa);
         btnGuardar = (Button) findViewById(R.id.btnGuardar);
 
-        Pipa = this.getSharedPreferences("appInfo", Context.MODE_PRIVATE);
+        Pipa = getApplicationContext().getSharedPreferences("appInfo", Context.MODE_PRIVATE);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -42,7 +42,7 @@ public class IngresaPipa extends AppCompatActivity {
 
         }
 
-        String[] unidades = {"1", "2", "3", "4", "5", "6", "7", "8"};
+        String[] unidades = {"1", "2", "3", "4", "5", "6", "7", "8","9"};
         spinnerPipa.setAdapter(new ArrayAdapter<String>(IngresaPipa.this, android.R.layout.simple_spinner_dropdown_item, unidades));
 
         //String unidad = (String) spinnerPipa.getSelectedItem();
@@ -71,10 +71,11 @@ public class IngresaPipa extends AppCompatActivity {
                 System.out.println("Pipa Seleccionada Preferencia"+noPipa);
                 SharedPreferences.Editor editor = Pipa.edit();
                 editor.putString("nopipa", spinnerPipa.getSelectedItem().toString());
+                editor.apply();
                 editor.commit();
                 Toast.makeText(IngresaPipa.this, "Pipa actualizada correctamente", Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(IngresaPipa.this, MainActivity.class);
-                 startActivity(i);
+                 startActivity( i);
 
             }
         });

@@ -296,20 +296,21 @@ public class MainActivity extends AppCompatActivity {
     private void ObtenerPrecio() {
         //send request, display a message that nip is incorrect or let it continue to the next step
         RequestQueue MyRequestQueue = Volley.newRequestQueue(this);
-        String url = "https://grupopetromar.com/db/scripts/get_productos.php"; // <----enter your post url here
-        StringRequest MyStringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+        String url = "https://sistemagas.grupopetromar.com/scripts/obtenerPrecioGPLP.php"; // <----enter your post url here
+        StringRequest MyStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONObject obj = new JSONObject(response);
 
-                    String productos = obj.getString("productos");
+                   /* String productos = obj.getString("productos");
                     JSONObject obj1 = new JSONObject(productos);
                     String gas = obj1.getString("GAS");
                     JSONObject gasobj = new JSONObject(gas);
                     String preciogas = gasobj.getString("precio");
-                    TxtPrecioActual.setText(preciogas);
-                    eTXTPrecio.setText(preciogas);
+                    */
+                    TxtPrecioActual.setText(obj.getString("precio_venta"));
+                    eTXTPrecio.setText(obj.getString("precio_venta"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
